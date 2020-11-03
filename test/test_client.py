@@ -1,12 +1,5 @@
-from asyncupbankapi import Client
-from os import getenv
 import pytest
-import sys
-import os
-
-# So we can do the import
-myPath = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, myPath + '/../')
+from asyncupbankapi import Client
 
 
 @pytest.mark.asyncio
