@@ -8,6 +8,7 @@ If there's any issues please let me know.
 [![Supported python versions](https://img.shields.io/pypi/pyversions/up-bank-api?style=flat-square)](https://pypi.python.org/pypi/async-up-bank-api)
 [![License](https://img.shields.io/github/license/jcwillox/up-bank-api?style=flat-square)](https://github.com/unchartedshark/async-up-bank-api/blob/master/LICENSE)
 ![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/unchartedshark/async-up-bank-api?style=flat-square)
+[![codecov](https://codecov.io/gh/unchartedshark/async-up-bank-api/branch/master/graph/badge.svg?token=MYPJYBFCWJ)](https://codecov.io/gh/unchartedshark/async-up-bank-api)
 
 This is an unofficial python wrapper (client) for the australian bank Up's API.
 
