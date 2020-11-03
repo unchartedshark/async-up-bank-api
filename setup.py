@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 PACKAGE_NAME = "async-up-bank-api"
-VERSION = "0.1.1"
+VERSION = "v0.1.1"
 PROJECT_URL = "https://github.com/unchartedshark/async-up-bank-api"
 PROJECT_AUTHOR = "Joshua Cowie-Willox & Jason Dau"
 DOWNLOAD_URL = f"{PROJECT_URL}/archive/{VERSION}.zip"
