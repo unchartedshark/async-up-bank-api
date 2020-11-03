@@ -1,6 +1,6 @@
 # Async Up Bank API
 
-This project is a async fork of jcwillox/up-bank-api. I've attempted to keep most things the same but I have changed a fair bit.
+This project is a async fork of jcwillox/up-bank-api. I've attempted to keep most things the same externally.
 
 If there's any issues please let me know.
 
