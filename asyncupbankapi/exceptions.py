@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Optional
 
 
 class UpBankException(Exception):
@@ -51,6 +51,11 @@ class UpBankException(Exception):
 
 class NotAuthorizedException(UpBankException):
     """Raised for an invalid Up token."""
+
+    def __init__(self, error: Optional[Dict] = None):
+        if error is None:
+            error = {}
+        super().__init__(error)
 
 
 class NotFoundException(UpBankException):

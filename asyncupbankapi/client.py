@@ -14,7 +14,7 @@ from asyncupbankapi.models.webhooks import Webhook, WebhookEvent, WebhookLogs, W
 
 
 class Client:
-    async def __init__(self, token: Optional[str] = None) -> None:
+    def __init__(self, token: Optional[str] = None) -> None:
         """UP Bank API Client.
 
         :param token: UP Bank Token if not provided fetches "UP_TOKEN" from environment variables
