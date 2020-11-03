@@ -1,7 +1,7 @@
 # Category Classes
 from typing import List, Optional
 
-from upbankapi.models.baseModels import RelatedObject, RelatedObjects, Self, TypeAndId
+from asyncupbankapi.models.baseModels import RelatedObject, RelatedObjects, Self, TypeAndId
 from pydantic import BaseModel, root_validator
 
 

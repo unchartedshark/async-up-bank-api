@@ -1,4 +1,6 @@
-from ..asyncUpBankApi import Client, NotAuthorizedException
+from asyncupbankapi.models.transactions import Transaction
+from asyncupbankapi.models.accounts import Account
+from asyncupbankapi import Client, NotAuthorizedException
 import asyncio
 
 # use the environment variable UP_TOKEN
@@ -8,12 +10,15 @@ client = Client("up:yeah:bzDy7AB2yckyBDcqaUPJOru7d5jX4o9eHrWbNoGobxRUyvoIqCYgh23
 async def main():
     accounts = await client.accounts()
 
+    account: Account
+    transaction: Transaction
+
     # list accounts
     async for account in accounts:
         print(account)
 
         # list transactions for account
-        async for transaction in account.transactions():
+        async for transaction in await account.transactions():
             print(transaction)
 
 if __name__ == '__main__':

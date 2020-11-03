@@ -2,18 +2,15 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Dict, Optional, Union
 from uuid import UUID
-
 from yarl import URL
-from .httpSession import HttpSession
-
-from .const import BASE_URL, PAGE_SIZE
-
-from .models.accounts import Account, Accounts
-from .models.categories import Category, Categories
-from .models.tags import Tags
-from .models.transactions import Transaction, Transactions
-from .models.utility import Ping
-from .models.webhooks import Webhook, WebhookEvent, WebhookLogs, Webhooks
+from asyncupbankapi.httpSession import HttpSession
+from asyncupbankapi.const import BASE_URL, PAGE_SIZE
+from asyncupbankapi.models.accounts import Account, Accounts
+from asyncupbankapi.models.categories import Category, Categories
+from asyncupbankapi.models.tags import Tags
+from asyncupbankapi.models.transactions import Transaction, Transactions
+from asyncupbankapi.models.utility import Ping
+from asyncupbankapi.models.webhooks import Webhook, WebhookEvent, WebhookLogs, Webhooks
 
 
 class Client:

@@ -7,7 +7,7 @@ from aiohttp.client_reqrep import ClientResponse
 from aiohttp.hdrs import AUTHORIZATION, CONTENT_TYPE
 from aiohttp.typedefs import StrOrURL
 
-from upbankapi.exceptions import (NotAuthorizedException, NotFoundException,
+from asyncupbankapi.exceptions import (NotAuthorizedException, NotFoundException,
                                   RateLimitExceededException, UpBankException)
 
 

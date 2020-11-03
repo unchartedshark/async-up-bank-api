@@ -3,9 +3,9 @@ from __future__ import annotations
 from pydantic import BaseModel, root_validator, validator, PrivateAttr
 from yarl import URL
 from uuid import UUID
-from typing import Any, AsyncIterator, Awaitable, Iterator, Optional, List, Union
-from upbankapi.const import PAGE_SIZE
-from upbankapi.httpSession import HttpSession
+from typing import AsyncIterator, Awaitable, Iterator, Optional, List, Union
+from asyncupbankapi.const import PAGE_SIZE
+from asyncupbankapi.httpSession import HttpSession
 import asyncio
 
 

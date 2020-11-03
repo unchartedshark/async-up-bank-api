@@ -1,6 +1,6 @@
 # Tag Classes
 from typing import List
-from upbankapi.models.baseModels import RelatedLinks, TypeAndId, Pagination
+from asyncupbankapi.models.baseModels import RelatedLinks, TypeAndId, Pagination
 from pydantic import BaseModel, root_validator
 
 

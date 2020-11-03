@@ -1,8 +1,8 @@
 # Webhook Classes
 from typing import List, Optional
 from pydantic import BaseModel, root_validator
-from upbankapi.const import BASE_URL, PAGE_SIZE, WebhookDeliveryStatus, WebhookEventType
-from upbankapi.models.baseModels import Pagination, RelatedUUIDObject, RelatedUUIDObjectWithoutLinks, TypeandUUID, RelatedLinks, Self
+from asyncupbankapi.const import BASE_URL, PAGE_SIZE, WebhookDeliveryStatus, WebhookEventType
+from asyncupbankapi.models.baseModels import Pagination, RelatedUUIDObject, RelatedUUIDObjectWithoutLinks, TypeandUUID, RelatedLinks, Self
 from datetime import datetime
 
 
