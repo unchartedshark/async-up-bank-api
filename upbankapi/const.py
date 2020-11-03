@@ -1,10 +1,27 @@
-ACCOUNT_SAVER = "SAVER"
-ACCOUNT_TRANSACTIONAL = "TRANSACTIONAL"
+from enum import Enum
 
 BASE_URL = "https://api.up.com.au/api/v1"
+PAGE_SIZE = "page[size]"
 
-TRANSACTION_HELD = "HELD"
-TRANSACTION_SETTLED = "SETTLED"
 
-DEFAULT_PAGE_SIZE = 20
-DEFAULT_LIMIT = 20
+class AccountType(Enum):
+    SAVER = "SAVER"
+    TRANSACTIONAL = "TRANSACTIONAL"
+
+
+class TransactionStatus(Enum):
+    HELD = "HELD"
+    SETTLED = "SETTLED"
+
+
+class WebhookEventType(Enum):
+    CREATED = "TRANSACTION_CREATED"
+    SETTLED = "TRANSACTION_SETTLED"
+    DELETED = "TRANSACTION_DELETED"
+    PING = "PING"
+
+
+class WebhookDeliveryStatus(Enum):
+    DELIVERED = "DELIVERED"
+    UNDELIVERABLE = "UNDELIVERABLE"
+    BAD_RESPONSE_CODE = "BAD_RESPONSE_CODE"

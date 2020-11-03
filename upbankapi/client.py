@@ -1,88 +1,74 @@
+from __future__ import annotations
 from datetime import datetime
-from os import getenv
-from typing import Optional, Dict
+from typing import Dict, Optional, Union
+from uuid import UUID
 
-import requests
+from yarl import URL
+from .httpSession import HttpSession
 
-from .PaginatedList import PaginatedList
-from .const import BASE_URL, DEFAULT_PAGE_SIZE, DEFAULT_LIMIT
-from .exceptions import (
-    NotAuthorizedException,
-    RateLimitExceededException,
-    UpBankException,
-)
-from .models import Account, Transaction, Webhook, WebhookLog, WebhookEvent
+from .const import BASE_URL, PAGE_SIZE
+
+from .models.accounts import Account, Accounts
+from .models.categories import Category, Categories
+from .models.tags import Tags
+from .models.transactions import Transaction, Transactions
+from .models.utility import Ping
+from .models.webhooks import Webhook, WebhookEvent, WebhookLogs, Webhooks
 
 
 class Client:
-    def __init__(self, token: str = None):
-        self._token = token if token else getenv("UP_TOKEN")
-        self._session = requests.Session()
-        self._session.headers = {"Authorization": f"Bearer {self._token}"}
-        self.webhook = WebhookAdapter(self)
+    def __init__(self, token: Optional[str] = None) -> None:
+        """UP Bank API Client.
 
-    def api(
-        self, endpoint: str, method: str = "GET", body: Dict = None, params=None
-    ) -> Dict:
-        """This method is used to directly interact the up bank api."""
-        response = self._session.request(
-            method=method, json=body, params=params, url=f"{BASE_URL}{endpoint}"
-        )
+        :param token: UP Bank Token if not provided fetches "UP_TOKEN" from environment variables
+        """
+        self._session = HttpSession(token)
+        self.webhook = WebhookAdapter(self._session)
 
-        data = response.json()
+    async def close(self) -> None:
+        await self._session.close()
 
-        if response.status_code == 204:
-            return {}
+    async def ping(self) -> Ping:
+        """Returns the users unique id and emoji and will raise an exception if the token is not valid."""
+        return Ping.parse_obj(await self._session.get(f"{BASE_URL}/util/ping"))
 
-        if response.status_code >= 400:
-            try:
-                error = data["errors"][0]
-            except ValueError:
-                error = {}
-
-            if response.status_code == 401:
-                raise NotAuthorizedException(error)
-            if response.status_code == 429:
-                raise RateLimitExceededException(error)
-
-            raise UpBankException(error)
-
-        return data
-
-    def ping(self) -> str:
-        """Returns the users unique id and will raise an exception if the token is not valid."""
-        return self.api("/util/ping")["meta"]["id"]
-
-    def accounts(
-        self, limit: Optional[int] = DEFAULT_LIMIT, page_size: int = DEFAULT_PAGE_SIZE,
-    ) -> PaginatedList[Account]:
+    async def accounts(
+        self, limit: Optional[int] = None, page_size: int = None,
+    ) -> Accounts:
         """Returns a list of the users accounts.
 
-        :param limit maximum number of records to return (set to None for all transactions)
-        :param page_size number of records to fetch in each request (max 100)
+        :param limit: maximum number of records to return (set to None for all transactions)
+        :param page_size: number of records to fetch in each request (max 100)
         """
-        if limit and limit < page_size:
+        params = {}
+
+        if limit and page_size and limit < page_size:
             page_size = limit
 
-        response = self.api("/accounts", params={"page[size]": page_size})
-        elements = [Account(self, account) for account in response["data"]]
-        return PaginatedList(self, Account, elements, response["links"]["next"], limit)
+        if page_size:
+            params.update({PAGE_SIZE: str(page_size)})
 
-    def account(self, account_id: str) -> Account:
+        return Accounts(
+            data=await self._session.get(f"{BASE_URL}/accounts", params=params),
+            session=self._session,
+            limit=limit)
+
+    async def account(self, account_id: UUID) -> Account:
         """Returns a single account by its unique account id."""
-        return Account(self, self.api(f"/accounts/{account_id}")["data"])
+        return Account(
+            data=await self._session.get(f"{BASE_URL}/accounts/{account_id}"),
+            session=self._session)
 
-    def transactions(
+    async def transactions(
         self,
-        limit: Optional[int] = DEFAULT_LIMIT,
-        page_size: int = DEFAULT_PAGE_SIZE,
-        status: str = None,
-        since: datetime = None,
-        until: datetime = None,
-        category: str = None,
-        tag: str = None,
-        account_id: str = None,
-    ) -> PaginatedList[Transaction]:
+        limit: Optional[int] = None,
+        page_size: Optional[int] = None,
+        status: Optional[str] = None,
+        since: Optional[datetime] = None,
+        until: Optional[datetime] = None,
+        category: Optional[str] = None,
+        tag: Optional[str] = None
+    ) -> Transactions:
         """Returns transactions for a specific account or all accounts.
 
         :param limit maximum number of records to return (set to None for all transactions)
@@ -94,106 +80,132 @@ class Client:
         :param tag:
         :param account_id: optionally supply a unique id of the account to fetch transactions from
         """
-        if limit and limit < page_size:
+        if limit and page_size and limit < page_size:
             page_size = limit
 
-        params = {"page[size]": page_size}
+        params = {}
 
+        if page_size:
+            params.update({PAGE_SIZE: str(page_size)})
         if status:
-            params["filter[status]"] = status
+            params.update({"filter[status]": status})
         if since:
-            params["filter[since]"] = since.astimezone().isoformat()
+            params.update({"filter[since]": since.astimezone().isoformat()})
         if until:
-            params["filter[until]"] = until.astimezone().isoformat()
+            params.update({"filter[until]": until.astimezone().isoformat()})
         if category:
-            params["filter[category]"] = category
+            params.update({"filter[category]": category})
         if tag:
-            params["filter[tag]"] = tag
+            params.update({"filter[tag]": tag})
 
-        endpoint = "/transactions"
-        if account_id:
-            endpoint = f"/accounts/{account_id}/transactions"
+        return Transactions(
+            data=await self._session.get(f"{BASE_URL}/transactions", params=params),
+            session=self._session,
+            limit=limit)
 
-        response = self.api(endpoint, params=params)
-        elements = [Transaction(self, transaction) for transaction in response["data"]]
-        return PaginatedList(
-            self, Transaction, elements, response["links"]["next"], limit
-        )
-
-    def transaction(self, transaction_id: str):
+    async def transaction(self, transaction_id: UUID) -> Transaction:
         """Returns a single transaction by its unique id."""
-        return Transaction(self, self.api(f"/transactions/{transaction_id}")["data"])
+        return Transaction(
+            data=await self._session.get(f"{BASE_URL}/transactions/{transaction_id}"),
+            session=self._session)
 
-    ### Webhooks ###
-    def webhooks(
-        self, limit: Optional[int] = DEFAULT_LIMIT, page_size: int = DEFAULT_PAGE_SIZE
-    ) -> PaginatedList[Webhook]:
+    async def categories(self, parent: Optional[str] = None) -> Categories:
+        """Returns a list of cateogries."""
+        if parent:
+            return Categories.parse_obj(await self._session.get(f"{BASE_URL}/categories", params={"filter[parent": parent}))
+        return Categories.parse_obj(await self._session.get(f"{BASE_URL}/categories"))
+
+    async def category(self, category_id: str) -> Category:
+        """Returns a single Category by its unique id."""
+        return Category.parse_obj(await self._session.get(f"{BASE_URL}/categories/{category_id}"))
+
+    async def tags(self) -> Tags:
+        """Retrieve a list of all tags currently in use. The returned list is paginated and can be scrolled by following the next and prev links where present. Results are ordered lexicographically. The transactions relationship for each tag exposes a link to get the transactions with the given tag."""
+        return Tags.parse_obj(await self._session.get(f"{BASE_URL}/tags"))
+
+    async def webhooks(self, limit: Optional[int] = None, page_size: Optional[int] = None) -> Webhooks:
         """Returns a list of the users webhooks.
 
-        :param limit maximum number of records to return (set to None for all transactions)
-        :param page_size number of records to fetch in each request (max 100)
+        :param limit: maximum number of records to return (set to None for all records)
+        :param page_size: number of records to fetch in each request (max 100)
         """
-        if limit and limit < page_size:
+        if limit and page_size and limit < page_size:
             page_size = limit
 
-        response = self.api("/webhooks", params={"page[size]": page_size})
-        elements = [Webhook(self, webhook) for webhook in response["data"]]
-        return PaginatedList(self, Webhook, elements, response["links"]["next"], limit)
+        params = {}
+
+        if page_size:
+            params.update({PAGE_SIZE: str(page_size)})
+
+        return Webhooks(
+            data=await self._session.get(f"{BASE_URL}/webhooks", params=params),
+            session=self._session,
+            limit=limit)
 
 
 class WebhookAdapter:
-    def __init__(self, client):
-        self._client = client
+    def __init__(self, session: HttpSession):
+        self._session = session
 
-    def __call__(self, webhook_id: str) -> Webhook:
-        """Returns a single webhook by its unique id."""
-        return self.get(webhook_id)
+    async def __call__(self, webhook_id: UUID) -> Webhook:
+        """Returns a single webhook by its unique id.
 
-    def get(self, webhook_id: str) -> Webhook:
-        """Returns a single webhook by its unique id."""
+        :param webhook_id: The unique identfier of the webhook."""
+        return await self.get(webhook_id)
+
+    async def get(self, webhook_id: UUID) -> Webhook:
+        """Returns a single webhook by its unique id.
+
+        :param webhook_id: The unique identfier of the webhook."""
         return Webhook(
-            self._client, self._client.api(f"/webhooks/{webhook_id}")["data"]
-        )
+            data=await self._session.get(f"{BASE_URL}/webhooks/{webhook_id}"),
+            session=self._session)
 
-    def create(self, url: str, description: str = None) -> Webhook:
-        """Registers and returns a new webhook."""
-        response = self._client.api(
-            "/webhooks",
-            method="POST",
-            body={"data": {"attributes": {"url": url, "description": description}}},
-        )
-        return Webhook(self._client, response["data"])
+    async def create(self, url: URL, description: Optional[str] = None) -> Webhook:
+        """Create a new webhook with the given URL.
 
-    def ping(self, webhook_id: str) -> WebhookEvent:
-        """Pings a webhook by its unique id."""
-        return WebhookEvent(
-            self._client,
-            self._client.api(f"/webhooks/{webhook_id}/ping", method="POST")["data"],
-        )
-
-    def logs(
-        self,
-        webhook_id: str,
-        limit: Optional[int] = DEFAULT_LIMIT,
-        page_size: int = DEFAULT_PAGE_SIZE,
-    ) -> PaginatedList[WebhookLog]:
-        """Returns the logs from a webhook by id.
-
-        :param webhook_id: unique id of a webhook
-        :param limit maximum number of records to return (set to None for all transactions)
-        :param page_size number of records to fetch in each request (max 100)
+        :param url: The URL that this webhook should post events to. This must be a valid HTTP or HTTPS URL that does not exceed 300 characters in length.
+        :param description: An optional description for this webhook, up to 64 characters in length.
         """
-        if limit and limit < page_size:
+
+        # Build the input requests payload.
+        attributes: Dict[str, Union[str, URL]]
+        attributes = {}
+        attributes.update({"url": url})
+
+        if description:
+            attributes.update({"description": description})
+
+        data = {}
+
+        data.update({"attributes": attributes})
+
+        payload = {}
+        payload.update({"data": data})
+
+        return Webhook(data=await self._session.post(f"{BASE_URL}/webhooks", payload=payload), session=self._session)
+
+    async def logs(self, webhook_id: UUID, limit: Optional[int] = None, page_size: Optional[int] = None) -> WebhookLogs:
+        """Returns a list of webhook logs.
+
+        :param webhook_id: The unique identfier of the webhook.
+        :param limit: maximum number of records to return (set to None for all records)
+        :param page_size: number of records to fetch in each request (max 100)"""
+
+        if limit and page_size and limit < page_size:
             page_size = limit
 
-        response = self._client.api(
-            f"/webhooks/{webhook_id}/logs", params={"page[size]": page_size}
-        )
-        elements = [WebhookLog(self._client, log) for log in response["data"]]
-        return PaginatedList(
-            self._client, WebhookLog, elements, response["links"]["next"], limit
-        )
+        params = {}
 
-    def delete(self, webhook_id: str):
-        """Deletes a webhook by its unique id."""
-        return self._client.api(f"/webhooks/{webhook_id}", method="DELETE")
+        if page_size:
+            params.update({PAGE_SIZE: str(page_size)})
+
+        return WebhookLogs(data=await self._session.get(f"{BASE_URL}/webhooks/{webhook_id}/logs"), session=self._session, limit=limit)
+
+    async def ping(self, webhook_id: str) -> WebhookEvent:
+        """Pings a webhook by its unique id."""
+        return WebhookEvent.parse_obj(await self._session.post(f"{BASE_URL}/webhooks/{webhook_id}/ping"))
+
+    async def delete(self, webhook_id: UUID) -> None:
+        """Delete a single webhook by its unique id."""
+        await self._session.delete(f"{BASE_URL}webhooks/{webhook_id}")

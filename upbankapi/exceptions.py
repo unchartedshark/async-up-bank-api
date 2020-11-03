@@ -53,6 +53,18 @@ class NotAuthorizedException(UpBankException):
     """Raised for an invalid Up token."""
 
 
+class NotFoundException(UpBankException):
+    """The requested resource was not found."""
+
+    def __init__(self, path: str):
+        error = {}
+        error.update({"status": "404"})
+        error.update({"title": "Not Found"})
+        error.update({"detail": "The requested resource was not found."})
+        error.update({"source": path})
+        super().__init__(error)
+
+
 class RateLimitExceededException(UpBankException):
     """Raised when too many requests are made to the API."""
 
