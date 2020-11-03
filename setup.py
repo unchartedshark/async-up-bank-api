@@ -22,7 +22,7 @@ if __name__ == "__main__":
         long_description=LONG_DESCRIPTION,
         long_description_content_type="text/markdown",
         python_requires=">=3.7",
-        install_requires=["aiohttp>=3.7.2","pydantic>=1.7.2"],
+        install_requires=["aiohttp[speedups]>=3.7.2","pydantic>=1.7.2"],
         classifiers=[
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
