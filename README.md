@@ -1,8 +1,6 @@
 # Async Up Bank API
 
-This project is a async fork of jcwillox/up-bank-api. I've attempted to keep most things the same externally.
-
-If there's any issues please let me know.
+This project is a async fork of jcwillox/up-bank-api. If there's any issues please let me know.
 
 [![Project version](https://img.shields.io/pypi/v/async-up-bank-api?style=flat-square)](https://pypi.python.org/pypi/async-up-bank-api)
 [![Supported python versions](https://img.shields.io/pypi/pyversions/up-bank-api?style=flat-square)](https://pypi.python.org/pypi/async-up-bank-api)
