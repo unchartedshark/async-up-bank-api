@@ -18,8 +18,13 @@ class HttpSession:
 
         :param token UP Bank Token if not provided fetches "UP_TOKEN" from environment variables
         """
+        up_token = token if token else getenv('UP_TOKEN')
+
+        if up_token is None:
+            raise NotAuthorizedException()
+
         self._session = aiohttp.ClientSession(
-            headers={AUTHORIZATION: f"Bearer {token if token else getenv('UP_TOKEN')}",
+            headers={AUTHORIZATION: f"Bearer {up_token}",
                      CONTENT_TYPE: "application/json"})
 
     async def close(self):
