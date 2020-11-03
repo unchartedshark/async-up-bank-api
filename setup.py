@@ -1,9 +1,9 @@
 from setuptools import find_packages, setup
 
-PACKAGE_NAME = "up-bank-api"
-VERSION = "0.3.2"
-PROJECT_URL = "https://github.com/jcwillox/up-bank-api"
-PROJECT_AUTHOR = "Joshua Cowie-Willox"
+PACKAGE_NAME = "async-up-bank-api"
+VERSION = "0.1.0"
+PROJECT_URL = "https://github.com/unchartedshark/async-up-bank-api"
+PROJECT_AUTHOR = "Joshua Cowie-Willox & Jason Dau"
 DOWNLOAD_URL = f"{PROJECT_URL}/archive/{VERSION}.zip"
 PACKAGES = find_packages()
 
@@ -22,7 +22,7 @@ if __name__ == "__main__":
         long_description=LONG_DESCRIPTION,
         long_description_content_type="text/markdown",
         python_requires=">=3.7",
-        install_requires=["requests>=2.14.0"],
+        install_requires=["aiohttp>=3.7.2","pydantic>=1.7.2"],
         classifiers=[
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
