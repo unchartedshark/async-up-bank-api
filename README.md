@@ -4,7 +4,7 @@ This project is a async fork of jcwillox/up-bank-api. I've attempted to keep mos
 
 If there's any issues please let me know.
 
-[![Project version](https://img.shields.io/pypi/v/up-bank-api?style=flat-square)](https://pypi.python.org/pypi/async-up-bank-api)
+[![Project version](https://img.shields.io/pypi/v/async-up-bank-api?style=flat-square)](https://pypi.python.org/pypi/async-up-bank-api)
 [![Supported python versions](https://img.shields.io/pypi/pyversions/up-bank-api?style=flat-square)](https://pypi.python.org/pypi/async-up-bank-api)
 [![License](https://img.shields.io/github/license/jcwillox/up-bank-api?style=flat-square)](https://github.com/unchartedshark/async-up-bank-api/blob/master/LICENSE)
 ![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/unchartedshark/async-up-bank-api?style=flat-square)
