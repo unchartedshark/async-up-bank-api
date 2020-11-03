@@ -117,27 +117,25 @@ await client.transaction("17c577f2-ae8e-4622-90a7-87d95094c2a9")
 
 ### Pagination
 
-Up's API uses pagination, this means methods in this library that return more than one record will return a `PaginatedList`. This is effectively just an iterator. 
-Every `page_size` records the instance of `PaginatedList` will make a request for the next `page_size` records.
+Up's API uses pagination, this means methods in this library that return more than one record with pagination sported will return a instance inheriting from `Pagination`. This is effectively just an async iterator. 
+
+Every `page_size` records the instance of `Pagination` will make a request for the next `page_size` records asynchronous.
 
 A `limit` can be used to limit the maximum number of records returned, when a limit is specified the iterator will never return more than `limit` but can return less.
 Using `limit=None` will return all records.
 ```python
-transactions = client.transactions(limit=5)
+transactions = await client.transactions(limit=5)
 
-for transaction in transactions:
+async for transaction in transactions:
     print(transactions)
-
-print(transactions)
->>> <upbankapi.PaginatedList.PaginatedList object at 0x05BCE670>
 
 print(list( transactions ))
 >>> [<Transaction SETTLED: -1.0 AUD [7-Eleven]>, <Transaction SETTLED: 10.0 AUD [Interest]>]
 ```
-`PaginatedList` supports **slicing**, it still returns an iterator and will fetch the records as required.
+`Pagination` supports **slicing**, it still returns an iterator and will fetch the records as required.
 
 ```python
-transactions = client.transactions(limit=20)
+transactions = await client.transactions(limit=20)
 list( transactions[10:20] )
 >>> [<Transaction ...>, ...]
 ```
@@ -148,42 +146,42 @@ list( transactions[10:20] )
 
 List users webhooks
 ```python
-list( client.webhooks() )
+list( await client.webhooks() )
 >>> [<Webhook '1c3a4fd4-6c57-4aa8-8481-cf31a46bc001': https://mywebhook.tld/c2f89ed40e26c936 (Hello World!)>]
 ```
 
 Get a specific webhook
 ```python
-client.webhook("1c3a4fd4-6c57-4aa8-8481-cf31a46bc001")
+await client.webhook("1c3a4fd4-6c57-4aa8-8481-cf31a46bc001")
 # or equivalently
-client.webhook.get("1c3a4fd4-6c57-4aa8-8481-cf31a46bc001")
+await client.webhook.get("1c3a4fd4-6c57-4aa8-8481-cf31a46bc001")
 >>> <Webhook '1c3a4fd4-6c57-4aa8-8481-cf31a46bc001': https://mywebhook.tld/c2f89ed40e26c936 (Hello World!)>
 ```
 
 Create a webhook
 ```python
-client.webhook.create("https://mywebhook.tld/c2f89ed40e26c936", description="Hello World!")
+await client.webhook.create("https://mywebhook.tld/c2f89ed40e26c936", description="Hello World!")
 >>> <Webhook '1c3a4fd4-6c57-4aa8-8481-cf31a46bc001': https://mywebhook.tld/c2f89ed40e26c936 (Hello World!)>
 ```
 
 Interacting with a webhook
 ```python
-webhook = client.webhook("1c3a4fd4-6c57-4aa8-8481-cf31a46bc001")
+webhook = await client.webhook("1c3a4fd4-6c57-4aa8-8481-cf31a46bc001")
 
 # ping the webhook
-webhook.ping()
+await webhook.ping()
 >>> <WebhookEvent PING: webhook_id='1c3a4fd4-6c57-4aa8-8481-cf31a46bc001'>
 
 # get the webhooks logs
-list( webhook.logs() )
+list( await webhook.logs() )
 >>> [<WebhookLog BAD_RESPONSE_CODE: response_code=404>]
 
 # get the event associated with a log entry
-webhook.logs()[0].event
+await webhook.logs()[0].event
 >>> <WebhookEvent PING: webhook_id='1c3a4fd4-6c57-4aa8-8481-cf31a46bc001'>
 
 # delete the webhook
-webhook.delete()
+await webhook.delete()
 ```
 
 When interacting with with a specific webhook there are two options.
@@ -192,10 +190,10 @@ For example the two code blocks below have the same result (deleting the webhook
 This is because option 1 will request the webhook details, and then send the delete request. Option 2 directly sends the delete request.
 ```python
 # Option 1
-client.webhook("1c3a4fd4-6c57-4aa8-8481-cf31a46bc001").delete()
+await client.webhook("1c3a4fd4-6c57-4aa8-8481-cf31a46bc001").delete()
 ```
 ```python
 # Option 2
-client.webhook.delete("1c3a4fd4-6c57-4aa8-8481-cf31a46bc001")
+await client.webhook.delete("1c3a4fd4-6c57-4aa8-8481-cf31a46bc001")
 ```
 Each option can be useful depending on the use case. Option 2 is primarily useful when do not already have the Webhook object but have the id and only want to perform a single action.
