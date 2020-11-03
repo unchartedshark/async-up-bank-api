@@ -1,9 +1,8 @@
 # Transaction Classes
-from typing import Optional
+from typing import Optional, List
 from asyncupbankapi.const import TransactionStatus
 from asyncupbankapi.models.baseModels import Money, Pagination, RelatedObject, RelatedUUIDObject, Self, TagsRelationship, TypeandUUID
 from pydantic import BaseModel, root_validator
-from typing import Optional, List
 from datetime import datetime
 
 class HoldInfo(BaseModel):
