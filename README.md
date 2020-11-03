@@ -29,6 +29,7 @@ To use this library you will need a personal access token which can be retrieved
 
 ```python
 from upbankapi import Client, NotAuthorizedException
+import asyncio
 
 # use the environment variable UP_TOKEN
 client = Client()
@@ -43,6 +44,9 @@ async def main():
         print("Authorized: " + user_id)
     except NotAuthorizedException:
         print("The token is invalid")
+        
+if __name__ == '__main__':
+    asyncio.get_event_loop().run_until_complete(main())
 ```
 ## Examples
 
@@ -54,15 +58,20 @@ async def main():
 ### Accounts
 
 ```python
-accounts = client.accounts()
+async def main():
+    account: Account
+    transaction: Transaction
 
-# list accounts
-for account in accounts:
-    print(account)
+    # list accounts
+    async for account in await client.accounts():
+        print(account)
 
-    # list transactions for account
-    for transaction in account.transactions():
-        print(transaction)
+        # list transactions for account
+        async for transaction in await account.transactions():
+            print(transaction)
+
+if __name__ == '__main__':
+    asyncio.get_event_loop().run_until_complete(main())
 
 >>> <Account 'Up Account' (TRANSACTIONAL): 1234.56 AUD>
 >>> <Transaction SETTLED: -1.0 AUD [7-Eleven]>
@@ -87,22 +96,22 @@ savings.balance
 
 Get transactions across all accounts.
 ```python
->>> list( client.transactions() )
+>>> list( await client.transactions() )
 [<Transaction SETTLED: -1.0 AUD [7-Eleven]>, <Transaction SETTLED: 10.0 AUD [Interest]>]
 ```
 Get last 5 transactions for a given account id.
 ```python
 SAVINGS_ID = "d7cd1152-e78a-4ad7-8202-d27cddb02a28"
 
-list( client.account(SAVINGS_ID).transactions(limit=5) )
+list( await client.account(SAVINGS_ID).transactions(limit=5) )
 >>> [<Transaction SETTLED: 10.0 AUD [Interest]>]
 
-list( client.transactions(account_id=SAVINGS_ID, limit=5) )
+list( await client.transactions(account_id=SAVINGS_ID, limit=5) )
 >>> [<Transaction SETTLED: 10.0 AUD [Interest]>]
 ```
 Get a specific transaction.
 ```python
-client.transaction("17c577f2-ae8e-4622-90a7-87d95094c2a9")
+await client.transaction("17c577f2-ae8e-4622-90a7-87d95094c2a9")
 >>> <Transaction SETTLED: -1.0 AUD [7-Eleven]>
 ```
 
